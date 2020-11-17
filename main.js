@@ -19,6 +19,28 @@ function loadEventsListeners(){
   clearBtn.addEventListener('click', removeAll);
 
   filter.addEventListener('keyup', filterTodo);
+
+  document.addEventListener('DOMContentLoaded', getTodos);
+}
+
+function getTodos(){
+  let todos;
+  if(localStorage.getItem('todos') === null){
+  todos =[];
+  } else {
+  todos = JSON.parse(localStorage.getItem('todos'));
+  }
+
+  todos.forEach(function(todo){
+    const li = document.createElement('li');
+    li.className = 'collection-item';
+    li.appendChild(document.createTextNode(todo));
+    const linkDelete = document.createElement('a');
+    linkDelete.className = 'delete-item secondary-content';
+    linkDelete.innerHTML = '<i class="fa fa-remove"></i>';
+    li.appendChild(linkDelete);
+    todoList.appendChild(li);
+  });
 }
 
 function addTodo(e){
@@ -27,7 +49,7 @@ function addTodo(e){
   }
 
   const li = document.createElement('li');
-  li.ClassName = 'collection-item';
+  li.className = 'collection-item';
   li.appendChild(document.createTextNode(todoInput.value));
   const linkDelete = document.createElement('a');
   linkDelete.className = 'delete-item secondary-content';
@@ -35,9 +57,26 @@ function addTodo(e){
   li.appendChild(linkDelete);
   todoList.appendChild(li);
 
+
+  storeLocalInfo(todoInput.value);
+
   todoInput.value = '';
 
+
+
   e.preventDefault();
+}
+
+function storeLocalInfo(todo){
+let todos;
+if(localStorage.getItem('todos') === null){
+todos =[];
+} else {
+todos = JSON.parse(localStorage.getItem('todos'));
+}
+todos.push(todo);
+
+localStorage.setItem('todos',JSON.stringify(todos));
 }
 
 function removeItem(e){
@@ -45,7 +84,26 @@ function removeItem(e){
 
       if(confirm('are you sure you want to delete this To do'));
       e.target.parentElement.parentElement.remove();
+
+      removeFromLocalStorage(e.target.parentElement.parentElement);
   }
+}
+
+function removeFromLocalStorage(todoItem){
+  let todos;
+  if(localStorage.getItem('todos') === null){
+  todos =[];
+  } else {
+  todos = JSON.parse(localStorage.getItem('todos'));
+  }
+  todos.forEach(function(todo, index){
+  if (todoItem.textContent === todo){
+    todos.splice(index, 1);
+  }
+});
+
+  localStorage.setItem('todos', JSON.stringify(todos));
+
 }
 
 
@@ -54,19 +112,21 @@ function removeAll(){
 
     todoList.removeChild(todoList.firstChild);
   }
+  removeAllFromLocalStorage();
+}
+function removeAllFromLocalStorage(){
+  localStorage.clear();
 }
 
 function filterTodo(e) {
 
 const text = e.target.value.toLowerCase();
-console.log(text)
-document.querySelectorAll('.collection-item').forEach(function(todo){
-  const item = todo.firstChild.textContent;
-  console.log(item)
+document.querySelectorAll('.collection-item').forEach(function(li){
+  const item = li.firstChild.textContent;
   if(item.toLowerCase().indexOf(text) !== -1){
-    todo.style.display = 'block';
+    li.style.display = 'block';
   }else {
-    todo.style.display = 'none';
+    li.style.display = 'none';
   }
 
 });
